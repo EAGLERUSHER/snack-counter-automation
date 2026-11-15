@@ -1,0 +1,25 @@
+<div class="login-page">
+  <section class="card">
+    <h1>Company sign-in</h1>
+    <p class="sub">Simulated SSO — pick your employee account</p>
+
+    @if (error()) {
+      <div class="alert">{{ error() }}</div>
+    }
+
+    <label for="emp">Employee</label>
+    <select
+      id="emp"
+      [ngModel]="employeeId()"
+      (ngModelChange)="employeeId.set($event)"
+    >
+      @for (e of employees(); track e.id) {
+        <option [value]="e.id">{{ e.name }} · {{ e.homeOffice }}</option>
+      }
+    </select>
+
+    <button type="button" (click)="signIn()" [disabled]="loading()">
+      {{ loading() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </section>
+</div>

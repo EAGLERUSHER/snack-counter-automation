@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Angular / Node
+node_modules/
+client/snack-counter-ui/dist/
+client/snack-counter-ui/.angular/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.log
+
+# Secrets
+.env
+.env.*
+*.pfx
+
+# Local npm at repo root (mistaken install)
+package-lock.json

@@ -1,0 +1,99 @@
+<div class="page">
+  <header class="top">
+    <div>
+      <h1>Snack Counter</h1>
+      <p class="sub">Oslo &amp; Bengaluru — refill coordination</p>
+    </div>
+  <div class="user-pick">
+    @if (auth.employee(); as me) {
+      <span class="signed-in">Signed in as <strong>{{ me.name }}</strong> ({{ me.homeOffice }})</span>
+    }
+    <button type="button" class="ghost" (click)="refresh()" [disabled]="loading()">Refresh</button>
+    <button type="button" class="ghost" (click)="auth.logout()">Sign out</button>
+  </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert">{{ error() }}</div>
+  }
+
+  <div class="grid">
+    @for (office of offices(); track office.id) {
+      <section class="card office" [class.over]="office.overBudget">
+        <div class="card-head">
+          <h2>{{ office.id }}</h2>
+          <span class="pill">{{ office.currency }}</span>
+        </div>
+        <div class="budget">
+          <div class="bar"><span [style.width.%]="budgetPct(office)"></span></div>
+          <p>{{ office.spentThisMonth }} / {{ office.monthlyBudget }} spent this month</p>
+        </div>
+
+        @if (refills()[office.id]; as refill) {
+          <div class="refill">
+            <div class="status">{{ refill.status }}</div>
+            <dl>
+              <div><dt>Assigned</dt><dd>{{ employeeName(refill.assignedVolunteerId) }}</dd></div>
+              <div><dt>Committed</dt><dd>{{ employeeName(refill.committedByEmployeeId) }}</dd></div>
+              @if (refill.purchaseAmount) {
+                <div><dt>Purchase</dt><dd>{{ refill.purchaseAmount }} {{ refill.purchaseCurrency }}</dd></div>
+              }
+            </dl>
+          </div>
+        } @else {
+          <p class="muted">No active refill</p>
+        }
+
+        <div class="actions">
+          <button type="button" (click)="reportEmpty(office.id)">Report empty box</button>
+          @if (refills()[office.id]) {
+            <button type="button" class="secondary" (click)="commit(office.id)">Volunteer commits</button>
+            <div class="row">
+              @if (office.id === 'Oslo') {
+                <input type="number" [(ngModel)]="purchaseOslo" />
+              } @else {
+                <input type="number" [(ngModel)]="purchaseBlr" />
+              }
+              <button type="button" class="secondary" (click)="purchase(office.id)">Record purchase</button>
+            </div>
+            <label class="file">
+              Receipt (image or PDF)
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                (change)="onReceipt(office.id, $event)"
+              />
+            </label>
+            <button type="button" class="secondary" (click)="submitHr(office.id)">Submit to HR</button>
+            <button type="button" class="secondary" (click)="approveHr(office.id)">Simulate HR approval</button>
+            <button type="button" class="ghost" (click)="reassign(office.id)">Check stale / reassign</button>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="card side">
+      <h2>Internal chat</h2>
+      <ul class="chat">
+        @for (m of chat(); track m.at + m.text) {
+          <li>
+            <span class="target">{{ m.target }}</span>
+            <span>{{ m.text }}</span>
+          </li>
+        }
+      </ul>
+      <h2>Monthly report</h2>
+      @if (report(); as r) {
+        <ul class="report">
+          @for (o of r.offices; track o.officeId) {
+            <li [class.warn]="o.overBudget">
+              {{ o.officeId }}: {{ o.spent }} / {{ o.budget }} {{ o.currency }}
+            </li>
+          }
+          <li class="total">Company total: {{ r.totalInReportingCurrency }} {{ r.reportingCurrency }}</li>
+        </ul>
+      }
+      <button type="button" class="ghost demo" (click)="advanceTime()">Demo: +5 hours (SLA)</button>
+    </section>
+  </div>
+</div>
